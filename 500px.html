@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>500px SDK Example 1</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>
+    <script src="//js.leapmotion.com/0.2.0/leap.min.js"></script>
+    <script src="js/500px.js"></script>
+    <script src="js/lightbox-2.6.min.js"></script>
+    <link href="css/lightbox.css" rel="stylesheet" />
+    <script src="js/jquery.leapSwipeHelper.js"></script>
+
+
+    <script src="http://jshine.googlecode.com/files/jquery.easing.1.3.js"></script>
+    <script src="http://jshine.googlecode.com/files/jquery.timers-1.1.2.js"></script>
+    <script src="http://jshine.googlecode.com/files/jquery.jshine.js"></script>
+
+    <style type="text/css">
+      img {
+        margin: 0; padding: 0;float: left;
+      }
+
+      #lightboxOverlay .favAni {
+        -webkit-animation    : waitingCircle 1s 1;
+      }
+
+      @-webkit-keyframes waitingCircle {
+        0%   { -webkit-transform: background-color: black; }
+        50% { -webkit-transform:  background-color: #330000;}
+        100% { -webkit-transform: background-color: black; }
+      }
+
+    </style>
+  </head>
+  <body>
+    <script>
+      $(function () {
+        _500px.init({
+          sdk_key: ''
+        });
+
+        var controllerOptions = {enableGestures: true};
+        var lastDirection  = null;
+        var stackDirection = {};
+        var directionCount = 0;
+
+        Leap.loop(controllerOptions, function(frame) {
+        if (frame.gestures.length > 0) {  
+          direction = getSwipeDirection(frame);
+          lastDirection = direction;
+          directionCount++;
+          if (lastDirection != direction) {
+            directionCount = 0;
+          } else if (directionCount > 10 && direction != undefined) {
+            swipeType = direction;
+            console.log('type=>', swipeType);
+            directionCount = 0;
+
+            if (swipeType == 'circle') {
+              var image_id = $('.lb-image').attr('src').replace('http://ppcdn.500px.org/', '').match(/\d*/);
+              window.addFavoritePost(image_id);
+              $('#lightboxOverlay').addClass('favAni');
+            }
+            if (swipeType == 'key tap') {
+              window.open('http://500px.com/favorites')
+            }
+          }
+
+        }
+        });
+
+        // When the user logs in we will pull their favorite photos
+        _500px.on('authorization_obtained', function () {
+          $('#not_logged_in').hide();
+
+          window.addFavoritePost = function (image_id) {
+              _500px.api('/photos/' + image_id + '/favorite', 'post');
+          }
+
+          // Get my user id
+          _500px.api('/users', function (response) {
+            var me = response.data.user;
+
+            var getPhotoByTag = function (endpoint, params) {
+              _500px.api(endpoint, params, function (response) {
+                if (response.data.photos.length == 0) {
+                  alert('no photo.');
+                } else {
+                  $.each(response.data.photos, function () {
+                    var big_image_url = this.image_url.replace('2.jpg', '4.jpg');
+                    $('#logged_in').append('<a href="' + big_image_url + '" data-lightbox="photos"><img src="' + this.image_url + '" data-id="' + this.id + '" class="addFavorite"/></a>');
+                  });
+                }
+              });
+            }
+
+            var tag = window.location.search;
+            tag = tag.replace('?tag=', '');
+            //getPhotoByTag('/photos', { feature: 'user_favorites', user_id: me.id });
+            for (var i=1 ; i<=10 ; i++) {
+              getPhotoByTag('/photos/search', { tag: encodeURI(tag), sort: 'votes', page: i});
+            }
+            $('#logged_in').show();
+          });
+        });
+
+        _500px.on('logout', function () {
+          $('#not_logged_in').show();
+          $('#logged_in').hide();
+          $('#logged_in').html('');
+        });
+
+        // If the user has already logged in & authorized your application, this will fire an 'authorization_obtained' event
+        _500px.getAuthorizationStatus();
+
+        // If the user clicks the login link, log them in
+        $('#login').click(_500px.login);
+      });
+    </script>
+
+    <div id="not_logged_in">
+      <a href="#" id="login">Login to 500px</a>
+    </div>
+    <div id="logged_in" style="display: none;">
+    </div>
+  </body>
+</html>

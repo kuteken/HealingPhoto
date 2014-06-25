@@ -1,0 +1,88 @@
+html, body {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+
+  font-family: 'Source Code Pro', sans-serif;
+}
+
+#full-screen-background-image {
+  z-index: -999;
+  min-height: 100%;
+  min-width: 1024px;
+  width: 100%;
+  height: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  -webkit-filter: blur(5px);
+}
+
+#wrapper {
+  position: relative;
+  width: 800px;
+  min-height: 400px;
+  margin: 300px auto;
+  color: #333;
+
+  text-align: center;
+}
+
+body#top h1, body#top p {
+  color: white;
+}
+
+body#top h1{
+  font-size: 50px;
+}
+
+body#top p, body#top .btn {
+  font-size: 20px;
+}
+
+.btn {
+  display: none;
+  border: 1px outset #F20056;
+  background-color: #F20056;
+  height:50px;
+  width:400px;
+  cursor:pointer;
+
+  margin: 100px auto;
+  padding: 10px;
+  text-align: center;
+  color:white;
+}
+
+body.your .btn {
+  border: 1px outset #3366CC;
+  background-color: #3366CC;
+}
+
+.none {
+  display: none;
+}
+
+div.fileinputs {  
+ position: relative;  
+ height:20px;  
+}  
+  
+div.fakefile {  
+ position: absolute;  
+ top: 0px;  
+ left: 300px;  
+ z-index: 1;  
+}  
+  
+input.file {  
+ position: relative;  
+ text-align: right;  
+ -moz-opacity:0 ;  
+ filter:alpha(opacity: 0);  
+ opacity: 0;  
+ z-index: 2;
+ height: 50px; 
+} 

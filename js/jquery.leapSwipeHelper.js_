@@ -1,0 +1,47 @@
+$(function() {
+  var getGestureType = function(gesture, distanse) {
+    // horizon
+    var ret = horizonCheck(gesture, distanse, ["down","up"]);
+    if (ret !== false) return ret;
+    return verticalCheck(gesture, distanse, ["right","left"]);
+  }
+
+  var horizonCheck = function(gesture,distanse,names) {
+    var _distanse = Math.abs(gesture.position[0] - gesture.startPosition[0]);
+    if (_distanse > distanse) return false;
+    if (gesture.position[0] < 0) {
+      return names[0];
+    } else {
+      return names[1];
+    }
+  }
+
+  var verticalCheck = function(gesture,distanse,names) {
+    var _distanse = Math.abs(gesture.position[1] - gesture.startPosition[1]);
+
+    if (_distanse > distanse) return false;
+
+    if (gesture.startPosition[1] > gesture.position[1]) {
+      return names[0];
+    } else {
+      return names[1];
+    }
+  }
+
+  $.fn.leapSwipeHelper = function(callback,options) {
+    options = $.extend({
+      distance: 50
+    });
+    var type = false;
+    this.each(function(){
+      if (this.state == "stop" && this.type == "swipe") {
+        console.log(this.state);
+        type = getGestureType(this,options.distance);
+      }
+    });
+    if (typeof callback === "function" && type !== false) {
+      $.proxy(callback,this,{type:type})();
+    }
+    return type;
+  }
+});
